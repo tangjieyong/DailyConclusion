@@ -50,17 +50,31 @@ public final class MappedStatement {
   private String[] resultSets;
 ```
 
-- ```Java
-  SqlSession sqlSession = sqlSessionFactory.openSession(true);
-  ```
+![1556110278525](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556110278525.png) 由会话工厂开启一个会话 
 
-  返回SqlSession的实现类DefaultSqlSession对象。他里面包含了Executor和Configuration；Executor会在这一步被创建,Executor接口包含操作数据库的API，通过这些API调用底层的JDBC操作![1556066689102](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556066689102.png)![1556066762956](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556066762956.png)
+![1556110576274](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556110576274.png)
 
-  ![1556066948327](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556066948327.png)
+![1556110667479](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556110667479.png) 在Configuration中默认使用Simple类型的Executor
 
-  ![1556066979034](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556066979034.png)
 
-  ![1556067155321](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556067155321.png)
+
+![1556066689102](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556066689102.png) 从Configuration中拿到Environment，根据Environment创建TransactionFactory，Configuration创建Executor 
+
+![1556066762956](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556066762956.png)
+
+创建一个SimpleExecutor 
+
+![1556066948327](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556066948327.png)
+
+为SimpleExecutor 的成员变量赋值
+
+![1556066979034](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556066979034.png) ![1556111820165](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556111820165.png)
+
+![1556111857011](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556111857011.png)
+
+
+
+![1556067155321](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556067155321.png)  返回DefaultSqlSession,里面包含Configuration和SimpleExecutor 
 
 
 
@@ -84,27 +98,29 @@ public final class MappedStatement {
 
   ![1556090726988](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556090726988.png)
 
-  ![1556090796516](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556090796516.png)
+  使用代理对象执行接口中的方法触发了动态代理中的强化方法，把Method封装为MapperMethod![1556090796516](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556090796516.png)
 
 
 
-  ![1556090939327](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556090939327.png)
+  先去缓存中查看若缓存中存在就直接从缓存中获得，如果缓存中不存在封装一个MapperMethod再存入缓存中![1556090939327](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556090939327.png)
 
 
 
   ![1556091009336](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091009336.png)
 
-  ![1556091061812](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091061812.png)
+  获得所执行接口方法所在的包名和方法名，去Configuration的MappedStatements（map集合），根据包名和方法名的组合去查找对应的MapperedStatement(一条sql语句及其所包含的全部标签组成一个MapperedStatement，配置文件中有多个mapper.xml，每一个Mapper.xml中有多个sql语句，因此Configuration采用map的方式保存，key为mapper.xml中的namespace+id,也就是接口所在的包名加接口中的方法名，value为MapperedStatement对象，里面封装了sql模块的所有标签值)![1556113776229](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556113776229.png)
+
+
 
 
 
   ![1556091139590](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091139590.png)
 
-  ![1556091256364](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091256364.png)
+  获得方法传入的参数，也就是sql语句的预编译参数![1556091256364](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091256364.png)
 
-  ![1556091370673](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091370673.png)
+  封装MapperMethod之后，MapperMethod执行execute方法其中的args是方法的接口方法的参数数组，MapperMethod内部已经封装过![1556091370673](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091370673.png)
 
-  ![1556091425083](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091425083.png)
+  根据方法的CommandType的不同来调用不同的增删改查方法，传入方法的名称以及方法的参数，之前先将参数数组转化为param类型的map![1556091425083](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091425083.png)
 
   ![1556091482680](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091482680.png)
 
@@ -112,17 +128,17 @@ public final class MappedStatement {
 
   ![1556091582170](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091582170.png)
 
-  ![1556091610608](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091610608.png)
+  调用executor的update方法，注意这里的细节，在update的参数中传入的又是Configuration中根据key获得的MapperStatement对象![1556091610608](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091610608.png)
 
   ![1556091699606](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556091699606.png)
 
-  ![1556092616476](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092616476.png)
+  执行之前先清一下缓存（数据库的update。delete操作都要清空一下缓存）![1556092616476](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092616476.png)
 
   ![1556092694500](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092694500.png)
 
 
 
-  ![1556092741742](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092741742.png)
+  主要这里的Statement是JDBC中的（跟源码重点看）![1556092741742](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092741742.png)
 
   ![1556092880557](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092880557.png)
 
