@@ -138,45 +138,75 @@ public final class MappedStatement {
 
 
 
-  主要这里的Statement是JDBC中的（跟源码重点看）![1556092741742](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092741742.png)
+![1556092741742](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092741742.png) 创建StatementHandler对象
 
-  ![1556092880557](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092880557.png)
+  ![1556151027494](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556151027494.png)
 
-  ![1556092962614](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092962614.png)
+![1556092880557](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092880557.png) 
 
-  ![1556092996685](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092996685.png)
+  创建StatementHandler对象本质上是创建RoutineStatementHander对象，再创建PreparedStatementHandler对象![1556092962614](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092962614.png)
 
-  ![1556093061233](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556093061233.png)
+  为父类BaseStatement的成员变量赋值，并且将mapperStatement的boundSql的属性取出传递给高层父类的BaseStatement的boundSql属性     ![1556092996685](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092996685.png) 
 
-  ![1556093147062](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556093147062.png)
+![1556151764997](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556151764997.png) 
 
-  ![1556093167607](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556093167607.png)
+![1556154153356](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556154153356.png)
 
-  ![1556093235006](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556093235006.png)
+。 
 
-  ![1556093251089](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556093251089.png)
+![1556152157553](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556152157553.png)
 
-  ![1556093343650](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556093343650.png)
+![1556154256057](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556154256057.png)
 
-  ![1556093440005](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556093440005.png)
 
-  ![1556093532986](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556093532986.png)
 
-  ![1556093965061](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556093965061.png)
+![1556152247230](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556152247230.png)
 
-  ![1556094079418](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556094079418.png)
+![1556152304296](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556152304296.png)
+
+![1556152421610](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556152421610.png)
+
+在BaseStatementHandler中同时实例化ParameterHandle和ResultHandler![1556152471810](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556152471810.png)
+
+
+
+  ![1556151661001](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556151661001.png)
+
+实例化StatementHander结束后本质上是返回封装好的RoutineStatementHander并返回，这是一个很重要的类，他可以完成处理sql语句预编译，设置参数等相关工作；在其内部调用ParameterHanler来设置参数，调用ResultSetHandler来完成结果的映射处理
+
+![1556093532986](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556093532986.png) 
+
+ 
+
+  接下来进行sql语句的预编译参数设置![1556094079418](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556094079418.png)
 
   ![1556094105944](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556094105944.png)
 
   ![1556094195054](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556094195054.png)
 
-  ![1556094224393](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556094224393.png)
+  ![1556155823311](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556155823311.png)
+
+![1556155841980](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556155841980.png)
+
+![1556155870524](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556155870524.png)
+
+![1556155925454](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556155925454.png)
+
+![1556155961318](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556155961318.png)
+
+![1556155986864](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556155986864.png)
+
+![1556156010301](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556156010301.png)
+
+![1556156096023](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556156096023.png)
+
+
 
   ![1556094293213](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556094293213.png)
 
   ![1556094321029](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556094321029.png)
 
-  ![1556094353840](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556094353840.png)  使用JDBC的PreparedStatement执行  
+  ![1556094353840](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556094353840.png)  
 
 
 
@@ -188,86 +218,4 @@ public final class MappedStatement {
 
 
 
-  ​                         代理对象执行接口中对应的方法会触发动态代理中的invoke方法，将原生的method包装成mapperMethod()
-
-```java
-public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
-  this.command = new SqlCommand(config, mapperInterface, method);
-  this.method = new MethodSignature(config, method);
-}
-```
-
-先进缓存查看
-
-```java
-private MapperMethod cachedMapperMethod(Method method) {
-  MapperMethod mapperMethod = methodCache.get(method);
-  if (mapperMethod == null) {
-    mapperMethod = new MapperMethod(mapperInterface, method, sqlSession.getConfiguration());
-    methodCache.put(method, mapperMethod);
-  }
-  return mapperMethod;
-}
-```
-
-
-
-​      包装结束执行execute()方法
-
-```java
-  return mapperMethod.execute(sqlSession, args);
-```
-
-​     根据mapperMethod方法的标签类型选择执行对应的增删改查方法
-
-```java
-public Object execute(SqlSession sqlSession, Object[] args) {
-  Object result;
-  if (SqlCommandType.INSERT == command.getType()) {
-    Object param = method.convertArgsToSqlCommandParam(args);
-    result = rowCountResult(sqlSession.insert(command.getName(), param));
-  } else if (SqlCommandType.UPDATE == command.getType()) {
-    Object param = method.convertArgsToSqlCommandParam(args);
-    result = rowCountResult(sqlSession.update(command.getName(), param));
-  } else if (SqlCommandType.DELETE == command.getType()) {
-    Object param = method.convertArgsToSqlCommandParam(args);
-    result = rowCountResult(sqlSession.delete(command.getName(), param));
-  } else if (SqlCommandType.SELECT == command.getType()) {
-```
-
-  本质上使用的是Excutor来执行，参数ms里面包含sql语句所在的标签信息， wrapCollection(parameter)包含传入的参数。
-
-​      
-
-```
-public int update(String statement, Object parameter) {
-  try {
-    dirty = true;
-    MappedStatement ms = configuration.getMappedStatement(statement);
-    return executor.update(ms, wrapCollection(parameter));
-  } catch (Exception e) {
-    throw ExceptionFactory.wrapException("Error updating database.  Cause: " + e, e);
-  } finally {
-    ErrorContext.instance().reset();
-  }
-}
-```
-
-![1556026825030](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556026825030.png)
-
-
-
-
-
-![1556026899251](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556026899251.png)
-
-
-
-![1556026936818](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556026936818.png)
-
-
-
-![1556027169504](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556027169504.png)
-
-
-
+  ​   
