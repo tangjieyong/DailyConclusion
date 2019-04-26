@@ -1,54 +1,149 @@
-mybtis是基于JDBC的轻量级封装，底层调用的还是JDBC的方法，大体上还是那几个步骤：
+mybtis是基于JDBC的轻量级封装，底层调用的还是JDBC的方法，本质上还是那几个步骤：
 
 
 
 1. 加载数据库驱动
+2. 创建并获取数据库链接
+3. 创建jdbc statement对象
+4. 设置sql语句
+5. 设置sql语句中的参数(使用preparedStatement)
+6. 通过statement执行sql并获取结果
+7. 对sql执行结果进行解析处理
+8. 释放资源(resultSet、preparedstatement、connection)
 
-2. 获得连接Connection
 
-3. 预编译参数PrepareStatement.set()
 
-4. 执行sql  PrepareStatement.excute()/excuteQuery()
+# 问题总结
 
-5. 获得返回结果集
+1. 数据库连接，使用时就创建，不使用立即释放，对数据库进行频繁连接开启和关闭，造成数据库资源浪费，影响数据库性能。
 
-只是在mybatis中，数据库驱动在全局配置文件中，预编译sql语句在mapper配置文件中，预编译参数由外界传入，返回的结果集要被映射为bean
+　　**设想：**使用数据库连接池管理数据库连接。
 
-mybatis通过一些重要的对象来完成上述操作
+1. 将sql语句硬编码到java代码中，如果sql语句修改，需要重新编译java代码，不利于系统维护。
 
-- ```java
-  SqlSessionFactory sqlSessionFactory=new SqlSessionFactoryBuilder().build(stream);
-  ```
+　　**设想：**将sql语句配置在xml配置文件中，即使sql变化，不需要对java代码进行重新编译，Java代码与sql语句分离，*Java代码中可以直接调用增删改查的API，底层做的还是将语句交给JDBC类型的PreparedStatement执行。*
 
-​    读取mybatis全局配置文件和mapper.xml并将配置文件的所有标签值封装在`Configuration`对象中，*将insert|update|delete|select标签内的所有标签封装在MapperStatement对象中*，configuration中有一个MapperStatements的map类型属性
+1. 向preparedStatement中设置参数，对占位符号位置和设置参数值，硬编码在java代码中，不利于系统维护。
+
+　　**设想：**将sql语句及占位符号和参数全部配置在xml中。
+
+1. 从resutSet中遍历结果集数据时，存在硬编码，将获取表的字段进行硬编码，不利于系统维护。
+
+　　**设想：**将查询的结果集，自动映射成java对象。
+
+#        原生的JDBC开发模式
 
 ```java
-public final class MappedStatement {
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-  private String resource;
-  private Configuration configuration;
-  private String id;
-  private Integer fetchSize;
-  private Integer timeout;
-  private StatementType statementType;
-  private ResultSetType resultSetType;
-  private SqlSource sqlSource;
-  private Cache cache;
-  private ParameterMap parameterMap;
-  private List<ResultMap> resultMaps;
-  private boolean flushCacheRequired;
-  private boolean useCache;
-  private boolean resultOrdered;
-  private SqlCommandType sqlCommandType;
-  private KeyGenerator keyGenerator;
-  private String[] keyProperties;
-  private String[] keyColumns;
-  private boolean hasNestedResultMaps;
-  private String databaseId;
-  private Log statementLog;
-  private LanguageDriver lang;
-  private String[] resultSets;
+public class JdbcTest {
+    public static void main(String[] args) {
+        //数据库连接
+       Connection connection = null;
+       //预编译的Statement，使用预编译的Statement提高数据库性能
+        PreparedStatement preparedStatement = null;
+       //结果集
+       ResultSet resultSet = null;
+    
+    try {
+        //加载数据库驱动
+        Class.forName("com.mysql.jdbc.Driver");
+
+        //通过驱动管理类获取数据库链接
+        connection =  DriverManager.getConnection("jdbc:mysql://120.25.162.238:3306/mybatis001?characterEncoding=utf-8", "root", "123");
+        //定义sql语句 ?表示占位符
+        String sql = "select * from user where username = ?";
+        //获取预处理statement
+        preparedStatement = connection.prepareStatement(sql);
+        //设置参数，第一个参数为sql语句中参数的序号（从1开始），第二个参数为设置的参数值
+        preparedStatement.setString(1, "王五");
+        //向数据库发出sql执行查询，查询出结果集
+        resultSet =  preparedStatement.executeQuery();
+        //遍历查询结果集
+        while(resultSet.next()){
+            System.out.println(resultSet.getString("id")+"  "+resultSet.getString("username"));
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }finally{
+        //释放资源
+        if(resultSet!=null){
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        if(preparedStatement!=null){
+            try {
+                preparedStatement.close();
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        if(connection!=null){
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+}
+    }
+
 ```
+
+
+
+# mybatis架构设计
+
+​      ![1556174125788](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556174125788.png) 
+
+# mybatis中重要对象的介绍
+
+1. ####    Configuration 
+
+   ​      该对象封装了配置文件的全部信息，包括全局配置文件和mappe配置文件，以及Executor,  ParameterHandler      ResultSetHandler,  StatementHandler等重要对象的实例化
+
+2. ####   MappedStatement
+
+      该对象封装了mapper.xml中一条增删改查语句对应的标签内的全部属性，比如sql语句，预编译参数类型，返回类型
+
+#    mybatis四大基本对象（都可以被拦截）
+
+###      1.   *Executor*
+
+​            内部定义了对数据库的update，update方法，供上层的SqlSession调用，他不直接与数据库发生关系，可作为一个中间的对象将API转换为直接将对应的语句交给JDBC的PreparedSatement执行
+
+###      2.  *ParameterHandler*
+
+​           将传入的参数映射到sql语句的的预编译参数位置  
+
+###      3.  *ResultSetHandler*
+
+​           把sql语句的执行结果映射到用户定义的结果返回类型（JavaBean）
+
+###      4. *StatementHandler*
+
+​          完成预编译语句（从MappedStatement中取出sql语句），进行预编译参数的设置（委托ParameterHandler进行），进行语句处理结果的封装处理（调用ResultSetHandler进行）
+
+
+
+#  mybatis的核心逻辑分析
+
+![1556176830649](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556176830649.png)
+
+
 
 ![1556110278525](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556110278525.png) 由会话工厂开启一个会话 
 
@@ -144,9 +239,9 @@ public final class MappedStatement {
 
 ![1556092880557](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092880557.png) 
 
-  创建StatementHandler对象本质上是创建RoutineStatementHander对象，再创建PreparedStatementHandler对象![1556092962614](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092962614.png)
+  创建StatementHandler对象本质上是创建RoutingStatementHander对象，再创建PreparedStatementHandler对象![1556092962614](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092962614.png)
 
-  为父类BaseStatement的成员变量赋值，并且将mapperStatement的boundSql的属性取出传递给高层父类的BaseStatement的boundSql属性     ![1556092996685](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092996685.png) 
+  为父类BaseStatement的成员变量赋值，并且将mapperStatement的boundSql的属性取出传递给高层父类的BaseStatementHandler的boundSql属性     ![1556092996685](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556092996685.png) 
 
 ![1556151764997](C:\Users\keyon\AppData\Roaming\Typora\typora-user-images\1556151764997.png) 
 
