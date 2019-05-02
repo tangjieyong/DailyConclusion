@@ -107,7 +107,7 @@ public class JdbcTest {
 
 # mybatis架构设计
 
-​      ![1556174125788](https://github.com/tangjieyong/DailyConclusion/blob/master/https://github.com/tangjieyong/DailyConclusion/blob/master/images/1556174125788.png) 
+​      ![1556174125788](https://github.com/tangjieyong/DailyConclusion/blob/master/images/1556174125788.png) 
 
 # mybatis中重要对象的介绍
 
@@ -141,7 +141,7 @@ public class JdbcTest {
 
 #  mybatis的核心逻辑分析
 
-![1556176830649](https://github.com/tangjieyong/DailyConclusion/blob/master/images/1556176830649.png)
+![1556176830649](https://github.com/tangjieyong/DailyConclusion/ra/master/images/1556176830649.png)
 
 
 
