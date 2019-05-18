@@ -1,0 +1,5 @@
+页面通过Ajax的方式传递数据给controller可以传递键值对也可以传递json，
+
+controller将数据返回给页面，不用指定返回给哪个页面，直接return结果即可，默认直接返回发起Ajax请求的那个页面
+
+Ajax不仅仅可以基于事件驱动，Node.js可以对Ajax进行二次的封装，若地址栏输入的url与其中的Ajax监听的地址匹配可以出发AJAX
